@@ -93,7 +93,3 @@ To deploy, run the following commands:
 npm run build
 ```
 
-```bash
-npm run deploy:offline  // To deploy localy
-npm run deploy			// To deploy on AWS (configured on serverless.yaml)
-```

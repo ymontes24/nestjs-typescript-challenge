@@ -1,15 +1,15 @@
-FROM node:14-alpine as base
+FROM node:18-alpine as base
 
 WORKDIR /app
 
 COPY package.json ./
 
-RUN yarn install
+RUN npm install
 
 COPY . .
 
-RUN yarn run build
+RUN npm run build
 
-CMD yarn run start:prod
+CMD npm run start:prod
 
 EXPOSE 3000
