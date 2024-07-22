@@ -1,33 +1,49 @@
 # nestjs-typescript-challenge
 
-This challenge-project uses Nest.js to implement three resources (agents, customers and orders) with their respective CRUD endpoints. It also includes pagination when we need to list orders and three special endpoints of orders when we only need the total amount of money grouped by customers, agents, or by countries. This endpoints are protected, so, to consume them, you need to register yourself to get a valid JWT.
+> This challenge-project uses Nest.js to implement three resources (agents, customers and orders) with their respective CRUD endpoints. It also includes pagination when we need to list orders and three special endpoints of orders when we only need the total amount of money grouped by customers, agents, or by countries. This endpoints are protected, so, to consume them, you need to register yourself to get a valid JWT. 
 
-The endpoints of the resources are:
+**Your task** is to build an [RBAC system](https://en.wikipedia.org/wiki/Role-based_access_control) adding the following roles: 
+1. `admin` - has access to all endpoints
+2. `agent` - has access to all endpoints except the ones related to customers
+3. `customer` - has access to all endpoints except the ones related to agents
+4. `guest` - has access only to the endpoints to register and login
 
-- [ ] /api/agents
-- [ ] /api/customers
-- [ ] /api/orders
+**Additionally**:
+1. Create a method to assign roles to users and protect the endpoints according to the roles.
+2. Update the documentation to include the new endpoints and the new roles.
+3. Add unit and integration tests to cover the new features.
+4. Add a CI/CD pipeline to run the tests and deploy the application in AWS Lambda.
+5. Add CloudWatch event metrics to monitor the application usage.
+---
+
+The already implemented endpoints of the resources are:
+
+-  /api/agents
+-  /api/customers
+-  /api/orders
 
 To register or to login:
 
-- [ ] /api/auth/register
-- [ ] /api/auth/login
+-  /api/auth/register
+-  /api/auth/login
 
 The documentation (swagger) can be found at:
 
-- [ ] /api/docs
+-  /api/docs
 
 ## Table of Contents
 
-- [Prerequisites](#prerequisites)
-- [Environment Variables](#environment-variables)
-- [Installation](#installation)
-- [Running Tests](#running-tests)
-- [Deployment](#deployment)
+- [nestjs-typescript-challenge](#nestjs-typescript-challenge)
+  - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+  - [Environment Variables](#environment-variables)
+  - [Installation](#installation)
+  - [Running Tests](#running-tests)
+  - [Serverless](#serverless)
 
 ## Prerequisites
 
-- [nodejs versión 14](https://nodejs.org/en/)
+- [nodejs version 18](https://nodejs.org/en/)
 
 ## Environment Variables
 
@@ -54,7 +70,7 @@ And if we want to use docker-compose we have to add:
 Clone the project
 
 ```bash
-git clone https://github.com/fedapon/nestjs-typescript-challenge
+git clone https://github.com/CaioF/nestjs-typescript-challenge
 ```
 
 Go to the project directory
