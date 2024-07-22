@@ -12,8 +12,8 @@
 1. Create a method to assign roles to users and protect the endpoints according to the roles.
 2. Update the documentation to include the new endpoints and the new roles.
 3. Add unit and integration tests to cover the new features.
-4. Add a CI/CD pipeline to run the tests and deploy the application in AWS Lambda.
-5. Add CloudWatch event metrics to monitor the application usage.
+4. Add a CI/CD pipeline to run the tests and deploy the application in AWS Lambda. [Example article](https://mayankgupta1338.medium.com/automate-aws-lambda-deployment-using-github-actions-for-nodejs-typescript-applications-4b75c7c17e02).
+5. Add CloudWatch event metrics to monitor the application usage. [Example article](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/graph_a_metric.html).
 ---
 
 The already implemented endpoints of the resources are:

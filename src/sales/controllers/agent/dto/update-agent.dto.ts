@@ -3,7 +3,7 @@ import { IsDecimal, IsOptional, MaxLength } from 'class-validator';
 
 export class UpdateAgentDto {
   @ApiPropertyOptional({
-    example: 'Jhon Smith',
+    example: 'John Smith',
   })
   @IsOptional()
   @MaxLength(40)
