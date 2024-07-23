@@ -3,11 +3,13 @@ import { UsersService } from './../../users/services/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from './../../users/models/user.entity';
 import { CreateUserDto } from '../controllers/dto/create-user.dto';
+import { RolesService } from './../../users/services/roles.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private rolesService: RolesService,
     private jwtService: JwtService,
   ) {}
 
@@ -36,8 +38,20 @@ export class AuthService {
   }
 
   async createUser(userDto: CreateUserDto) {
+    const role = await this.rolesService.findOneByName('guest');
+
+    if (!role) {
+      throw new Error('Role not found');
+    }
+
+    userDto.roles = [role];
+
     const user: User = await this.usersService.create(userDto);
-    const payload = { userId: user.id, email: user.email };
+    const payload = {
+      userId: user.id,
+      email: user.email,
+      rolesIds: user.roles.map((role) => role.id),
+    };
     return {
       access_token: this.jwtService.sign(payload),
     };
