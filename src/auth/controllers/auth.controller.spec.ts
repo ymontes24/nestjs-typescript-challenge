@@ -1,18 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
-import { AuthService } from './../services/auth.service';
+import { AuthService } from '../services/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { CloudWatchService } from '../../common/services/coudWatch.service';
 
 describe('AuthController', () => {
   let authController: AuthController;
   let authService: AuthService;
+  let cloudWatchService: CloudWatchService;
 
   const mockAuthService = {
     userExists: jest.fn(),
     createUser: jest.fn(),
     login: jest.fn(),
     updateRoles: jest.fn(),
+  };
+
+  const mockCloudWatchService = {
+    sendMetricData: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -23,11 +29,16 @@ describe('AuthController', () => {
           provide: AuthService,
           useValue: mockAuthService,
         },
+        {
+          provide: CloudWatchService,
+          useValue: mockCloudWatchService,
+        },
       ],
     }).compile();
 
     authController = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
+    cloudWatchService = module.get<CloudWatchService>(CloudWatchService);
   });
 
   afterEach(() => {
@@ -54,6 +65,10 @@ describe('AuthController', () => {
       expect(result).toEqual({ access_token: 'dummy_token' });
       expect(authService.userExists).toHaveBeenCalledWith(createUserDto.email);
       expect(authService.createUser).toHaveBeenCalledWith(createUserDto);
+      expect(cloudWatchService.sendMetricData).toHaveBeenCalledWith(
+        'UserRegistered',
+        1,
+      );
     });
 
     it('should throw an error if user already exists', async () => {
@@ -73,6 +88,10 @@ describe('AuthController', () => {
 
       expect(authService.userExists).toHaveBeenCalledWith(createUserDto.email);
       expect(authService.createUser).not.toHaveBeenCalled();
+      expect(cloudWatchService.sendMetricData).toHaveBeenCalledWith(
+        'UserAlreadyRegistered',
+        1,
+      );
     });
   });
 
@@ -88,6 +107,10 @@ describe('AuthController', () => {
 
       expect(result).toEqual({ access_token: 'dummy_token' });
       expect(authService.login).toHaveBeenCalledWith(req.user);
+      expect(cloudWatchService.sendMetricData).toHaveBeenCalledWith(
+        'UserLoggedIn',
+        1,
+      );
     });
   });
 
@@ -106,6 +129,10 @@ describe('AuthController', () => {
         body.email,
         body.rolesIds,
       );
+      expect(cloudWatchService.sendMetricData).toHaveBeenCalledWith(
+        'RolesUpdated',
+        1,
+      );
     });
 
     it('should throw an error if user not found', async () => {
@@ -122,6 +149,10 @@ describe('AuthController', () => {
       expect(authService.updateRoles).toHaveBeenCalledWith(
         body.email,
         body.rolesIds,
+      );
+      expect(cloudWatchService.sendMetricData).toHaveBeenCalledWith(
+        'RolesUpdated',
+        1,
       );
     });
   });
