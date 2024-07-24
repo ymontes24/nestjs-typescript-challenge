@@ -3,9 +3,12 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Role } from './role.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -44,6 +47,10 @@ export class User {
     nullable: false,
   })
   password: string;
+
+  @ManyToMany(() => Role, { nullable: true })
+  @JoinTable()
+  roles: Role[];
 
   @CreateDateColumn({
     name: 'created_at',

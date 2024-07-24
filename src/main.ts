@@ -18,11 +18,14 @@ async function bootstrap() {
     .setDescription(
       'This challenge uses Nest.js as its framework to implement three API Rest endpoints (agents, customers and orders) with passportjs authentication.',
     )
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'Authorization',
+    )
     .addTag('Auth')
     .addTag('Agents')
     .addTag('Customers')
     .addTag('Orders')
-    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/api/docs', app, document);
