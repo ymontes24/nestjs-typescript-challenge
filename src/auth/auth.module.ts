@@ -7,6 +7,7 @@ import { AuthController } from './controllers/auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
+import { CloudWatchService } from '../common/services/coudWatch.service';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, CloudWatchService],
   exports: [AuthService],
 })
 export class AuthModule {}

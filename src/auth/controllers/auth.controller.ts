@@ -16,11 +16,15 @@ import { Roles } from '../../common/decorators/role.decorator';
 import { Role } from '../../constants/roles.constants';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/role.guard';
+import { CloudWatchService } from '../../common/services/coudWatch.service';
 
 @ApiTags('Auth')
 @Controller('api/auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private cloudWatchService: CloudWatchService,
+  ) {}
 
   @Post('register')
   @HttpCode(201)
@@ -47,8 +51,10 @@ export class AuthController {
   async register(@Body() createUserDto: CreateUserDto): Promise<any> {
     const user = await this.authService.userExists(createUserDto.email);
     if (user) {
+      this.cloudWatchService.sendMetricData('UserAlreadyRegistered', 1);
       throw new HttpException('USER_ALREADY_REGISTERED', HttpStatus.CONFLICT);
     }
+    this.cloudWatchService.sendMetricData('UserRegistered', 1);
     return await this.authService.createUser(createUserDto);
   }
 
@@ -84,6 +90,7 @@ export class AuthController {
     },
   })
   async login(@Req() req) {
+    this.cloudWatchService.sendMetricData('UserLoggedIn', 1);
     return this.authService.login(req.user);
   }
 
@@ -120,6 +127,7 @@ export class AuthController {
     },
   })
   async updateRoles(@Body() body: any): Promise<any> {
+    this.cloudWatchService.sendMetricData('RolesUpdated', 1);
     return await this.authService.updateRoles(body.email, body.rolesIds);
   }
 }
