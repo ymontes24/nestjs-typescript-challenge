@@ -11,7 +11,11 @@ import {
 import { LocalAuthGuard } from './../guards/local-auth.guard';
 import { AuthService } from './../services/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../../common/decorators/role.decorator';
+import { Role } from '../../constants/roles.constants';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { RolesGuard } from '../guards/role.guard';
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -81,5 +85,41 @@ export class AuthController {
   })
   async login(@Req() req) {
     return this.authService.login(req.user);
+  }
+
+  @Post('update-roles')
+  @Roles(Role.Admin, Role.Agent, Role.Customer)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @HttpCode(201)
+  @ApiBearerAuth('Authorization')
+  @ApiBody({
+    schema: {
+      example: {
+        email: 'email@demo.com',
+        rolesIds: [1],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Update user roles',
+    schema: {
+      example: {
+        Message: 'Roles updated',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'User not found',
+      },
+    },
+  })
+  async updateRoles(@Body() body: any): Promise<any> {
+    return await this.authService.updateRoles(body.email, body.rolesIds);
   }
 }

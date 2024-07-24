@@ -14,12 +14,17 @@ export class UsersService {
       where: {
         email,
       },
+      relations: ['roles'],
     });
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     createUserDto.password = await this.encryptPassword(createUserDto.password);
     const user: User = await this.repository.create(createUserDto);
+    return await this.repository.save(user);
+  }
+
+  async update(user: User): Promise<User> {
     return await this.repository.save(user);
   }
 

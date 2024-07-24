@@ -27,7 +27,11 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = { userId: user.id, email: user.email };
+    const payload = {
+      userId: user.id,
+      email: user.email,
+      rolesIds: user.roles.map((role) => role.id),
+    };
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -55,5 +59,24 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async updateRoles(email: string, rolesIds: number[]) {
+    try {
+      const user: User = await this.usersService.findOneByEmail(email);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      user.roles = await this.rolesService.getRolesByIds(rolesIds);
+
+      await this.usersService.update(user);
+
+      return {
+        Message: 'Roles updated',
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }
