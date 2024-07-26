@@ -10,6 +10,7 @@ import { Agent } from '../../src/sales/models/agent.entity';
 import { Customer } from '../../src/sales/models/customer.entity';
 import { Order } from '../../src/sales/models/order.entity';
 import { User } from '../../src/users/models/user.entity';
+import { Role } from '../../src/users/models/role.entity';
 
 jest.mock('nestjs-typeorm-paginate', () => ({
   paginate: jest.fn().mockResolvedValue({
@@ -42,6 +43,7 @@ jest.mock('bcryptjs', () => {
 
 describe('SalesController (e2e)', () => {
   let app: INestApplication;
+  let userRole = { id: 1, name: 'admin' };
 
   const order = {
     ordNum: '200101',
@@ -109,7 +111,9 @@ describe('SalesController (e2e)', () => {
   const mockUserRepository = {
     findOne: jest
       .fn()
-      .mockImplementation((user) => Promise.resolve({ ...user, id: 1 })),
+      .mockImplementation((user) =>
+        Promise.resolve({ ...user, id: 1, roles: [userRole] }),
+      ),
   };
 
   beforeEach(async () => {
@@ -129,6 +133,8 @@ describe('SalesController (e2e)', () => {
       .useValue(mockOrderRepository)
       .overrideProvider(getRepositoryToken(User))
       .useValue(mockUserRepository)
+      .overrideProvider(getRepositoryToken(Role))
+      .useValue({})
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -269,5 +275,63 @@ describe('SalesController (e2e)', () => {
           totalOrdAmount: '7700.00',
         },
       ]);
+  });
+
+  it('/api/orders (GET) should fail with invalid role', async () => {
+    userRole = { id: 4, name: 'guest' };
+    return request(app.getHttpServer())
+      .get('/api/orders')
+      .auth(await getValidToken(), { type: 'bearer' })
+      .expect(403);
+  });
+
+  it('/api/orders (POST) should fail with invalid role', async () => {
+    userRole = { id: 4, name: 'guest' };
+    return request(app.getHttpServer())
+      .post('/api/orders')
+      .auth(await getValidToken(), { type: 'bearer' })
+      .send(order)
+      .expect(403);
+  });
+
+  it('/api/orders (UPDATE) should fail with invalid role', async () => {
+    userRole = { id: 4, name: 'guest' };
+    return request(app.getHttpServer())
+      .patch('/api/orders/200101')
+      .auth(await getValidToken(), { type: 'bearer' })
+      .send({ custCode: 'C00001' })
+      .expect(403);
+  });
+
+  it('/api/orders (DELETE) should fail with invalid role', async () => {
+    userRole = { id: 4, name: 'guest' };
+    return request(app.getHttpServer())
+      .delete('/api/orders/200101')
+      .auth(await getValidToken(), { type: 'bearer' })
+      .expect(403);
+  });
+
+  it('/api/orders/total-amount-by-customer should fail with invalid role', async () => {
+    userRole = { id: 4, name: 'guest' };
+    return request(app.getHttpServer())
+      .get('/api/orders/total-amount-by-customer')
+      .auth(await getValidToken(), { type: 'bearer' })
+      .expect(403);
+  });
+
+  it('/api/orders/total-amount-by-agent should fail with invalid role', async () => {
+    userRole = { id: 4, name: 'guest' };
+    return request(app.getHttpServer())
+      .get('/api/orders/total-amount-by-agent')
+      .auth(await getValidToken(), { type: 'bearer' })
+      .expect(403);
+  });
+
+  it('/api/orders/total-amount-by-country should fail with invalid role', async () => {
+    userRole = { id: 4, name: 'guest' };
+    return request(app.getHttpServer())
+      .get('/api/orders/total-amount-by-country')
+      .auth(await getValidToken(), { type: 'bearer' })
+      .expect(403);
   });
 });
