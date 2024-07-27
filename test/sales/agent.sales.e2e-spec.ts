@@ -10,6 +10,7 @@ import { Agent } from '../../src/sales/models/agent.entity';
 import { Customer } from '../../src/sales/models/customer.entity';
 import { Order } from '../../src/sales/models/order.entity';
 import { User } from '../../src/users/models/user.entity';
+import { Role } from '../../src/users/models/role.entity';
 
 jest.mock('bcryptjs', () => {
   return {
@@ -19,6 +20,7 @@ jest.mock('bcryptjs', () => {
 
 describe('SalesController (e2e)', () => {
   let app: INestApplication;
+  let userRole = { id: 2, name: 'agent' };
 
   const agent = {
     agentCode: 'A001',
@@ -51,7 +53,9 @@ describe('SalesController (e2e)', () => {
   const mockUserRepository = {
     findOne: jest
       .fn()
-      .mockImplementation((user) => Promise.resolve({ ...user, id: 1 })),
+      .mockImplementation((user) =>
+        Promise.resolve({ ...user, id: 1, roles: [userRole] }),
+      ),
   };
 
   beforeEach(async () => {
@@ -71,6 +75,8 @@ describe('SalesController (e2e)', () => {
       .useValue(mockOrderRepository)
       .overrideProvider(getRepositoryToken(User))
       .useValue(mockUserRepository)
+      .overrideProvider(getRepositoryToken(Role))
+      .useValue({})
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -150,5 +156,47 @@ describe('SalesController (e2e)', () => {
         raw: [],
         affected: 1,
       });
+  });
+
+  it('/api/agents (GET) should fail with invalid role', async () => {
+    userRole = { id: 3, name: 'customer' };
+
+    return request(app.getHttpServer())
+      .get('/api/agents')
+      .auth(await getValidToken(), { type: 'bearer' })
+      .expect(403)
+      .expect('Content-Type', /application\/json/);
+  });
+
+  it('/api/agents (POST) should fail with invalid role', async () => {
+    userRole = { id: 3, name: 'customer' };
+
+    return request(app.getHttpServer())
+      .post('/api/agents')
+      .auth(await getValidToken(), { type: 'bearer' })
+      .send(agent)
+      .expect(403)
+      .expect('Content-Type', /application\/json/);
+  });
+
+  it('/api/agents (UPDATE) should fail with invalid role', async () => {
+    userRole = { id: 3, name: 'customer' };
+
+    return request(app.getHttpServer())
+      .patch('/api/agents/A001')
+      .auth(await getValidToken(), { type: 'bearer' })
+      .send({ agentName: 'Jhon Smith' })
+      .expect(403)
+      .expect('Content-Type', /application\/json/);
+  });
+
+  it('/api/agents (DELETE) should fail with invalid role', async () => {
+    userRole = { id: 3, name: 'customer' };
+
+    return request(app.getHttpServer())
+      .delete('/api/agents/A001')
+      .auth(await getValidToken(), { type: 'bearer' })
+      .expect(403)
+      .expect('Content-Type', /application\/json/);
   });
 });

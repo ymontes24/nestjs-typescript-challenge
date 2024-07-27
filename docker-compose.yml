@@ -1,14 +1,16 @@
 version: '3.7'
 
 services:
-  app:
-    image: node:18
-    command: 'npm i && npm run start'
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - '3000:3000'
-    working_dir: '/app'
-    volumes:
-      - './:/app'
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - mysql
 
   mysql:
     image: mysql:5.7
@@ -16,10 +18,16 @@ services:
       - '.env'
     ports:
       - '3306:3306'
+    networks:
+      - app-network
     volumes:
       - 'challenge-nodejs-typescript:/var/lib/mysql'
       #copy sql script to ceate schemma, tables and demo data
       - ./scripts/init-data.sql:/docker-entrypoint-initdb.d/init-data.sql
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   challenge-nodejs-typescript:
